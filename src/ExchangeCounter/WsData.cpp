@@ -36,17 +36,6 @@ private:
 	std::chrono::seconds duration_to_check_liveness;
 	const string ping_str_;
 
-public:
-	WsData(const std::string& host, const std::string& endpoint, const std::string& port,
-		int seconds_wait_to_reset_connection, const string& ping_str, net::io_context& ioc):
-			host_{host}, endpoint_{endpoint}, port_{port},
-			ssl_ctx_{ssl::context::tlsv12_client},
-			strand_{net::make_strand(ioc.get_executor())},
-			duration_to_check_liveness{std::chrono::seconds(seconds_wait_to_reset_connection)}, ping_str_{ping_str}
-	{
-		ssl_ctx_.set_default_verify_paths();
-	}
-
 	struct WebsocketWithVersionNumber {
 		Websocket ws;
 		const int ver;
@@ -125,7 +114,7 @@ RECONNECT:
 		}
 
 		auto& ws = ws_v->ws;
-		beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
+		//beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
 		beast::get_lowest_layer(ws).async_connect(results, yield[ec]);
 		if(ec) {
 			cout << "connect failed, detail: " << ec.message() << endl;
@@ -134,10 +123,11 @@ RECONNECT:
 
 		beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
 		// Set a decorator to change the User-Agent of the handshake
-		ws.set_option(websocket::stream_base::decorator(
-				[](websocket::request_type& req) {
-					req.set(http::field::user_agent, "my_customerised_ua");
-				}));
+//		ws.set_option(websocket::stream_base::decorator(
+//				[](websocket::request_type& req) {
+//					req.set(http::field::user_agent, "my_customerised_ua");
+//				}));
+		SSL_set_tlsext_host_name(ws.next_layer().native_handle(), host_.c_str());
 		ws.next_layer().async_handshake(ssl::stream_base::client, yield[ec]);
 		if(ec) {
 			cout << "ssl_handshake failed, detail: " << ec.message() << endl;
@@ -154,8 +144,9 @@ RECONNECT:
 			goto RECONNECT;
 		}
 
-		//string msg_send = "{\"op\": \"subscribe\", \"args\": [\"trade:ADAUSDT\"]}";
-		string msg_send = "ping, please echo pong";
+		//string msg_send = R"({"op": "subscribe", "args": ["trade:ADAUSDT"]})";
+		string msg_send = R"({"op":"subscribe","args":["trade.XRPUSD"]})";
+		//string msg_send = "ping, please echo pong";
 		ws.async_write(net::buffer(msg_send), yield[ec]);
 		if(ec) {
 			cout << "websocket write failed, detail: " << ec.message() << endl;
@@ -170,7 +161,6 @@ RECONNECT:
 
 		beast::flat_buffer buffer;
 		while(true) {
-			goto RECONNECT;
 			ws.async_read(buffer, yield[ec]);
 			if(ec) {
 				cout << "websocket read failed, detail: " << ec.message() << endl;
@@ -182,6 +172,18 @@ RECONNECT:
 			cout << beast::make_printable(buffer.data()) << std::endl;
 			buffer.clear();
 		}
+	}
+
+public:
+	WsData(const std::string& host, const std::string& endpoint, const std::string& port,
+		   int seconds_wait_to_reset_connection, const string& ping_str, net::io_context& ioc):
+			host_{host}, endpoint_{endpoint}, port_{port},
+			//ssl_ctx_{ssl::context::tlsv12_client},
+			ssl_ctx_{ssl::context::tls_client},
+			strand_{net::make_strand(ioc.get_executor())},
+			duration_to_check_liveness{std::chrono::seconds(seconds_wait_to_reset_connection)}, ping_str_{ping_str}
+	{
+		ssl_ctx_.set_default_verify_paths();
 	}
 
 	void submit_coro() {
@@ -203,8 +205,9 @@ int main(int argc, char** argv)
     {
         std::cerr <<
             "Example:\n" <<
-            " ./src/ExchangeCounter/exchange_counter echo.websocket.org '/' 443\n";
-			" valgrind --leak-check=full ./src/ExchangeCounter/exchange_counter echo.websocket.org '/' 443\n";
+            " ./src/ExchangeCounter/exchange_counter echo.websocket.org '/' 443\n" <<
+			" valgrind --leak-check=full ./src/ExchangeCounter/exchange_counter www.bitmex.com '/realtime' 443\n" <<
+			" /hostShare/mnt47cpp17/altum_all/build_release/src/ExchangeCounter/exchange_counter stream.bytick.com '/realtime' 443\n";
         return EXIT_FAILURE;
     }
     auto const host = argv[1];
