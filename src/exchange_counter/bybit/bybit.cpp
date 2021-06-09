@@ -31,8 +31,8 @@ class BybitImpl {
 	OnOrderBookUpdate callback__orderbook_XRPUSD_;
 	OnTradeUpdate callback__trade_XRPUSD_;
 
-	OrderBook data__orderbook_XRPUSD_{"XRPUSD"};
-	Trade data__trade_XRPUSD_{"XRPUSD"};
+	OrderBook data__orderbook_XRPUSD_;
+	vector<Trade> data__trades_XRPUSD_;
 
 
 	JsonParser parser_;
@@ -47,7 +47,7 @@ class BybitImpl {
 
 		JsonIter iter = parser_.iterate(msg_data, msg_len, buf_len);
 
-		parse_json(move(iter), which_one, data__orderbook_XRPUSD_, data__trade_XRPUSD_);
+		parse_json(iter, which_one, data__orderbook_XRPUSD_, data__trades_XRPUSD_);
 
 		switch (which_one) {
 			case NOT_INTERESTED: {
@@ -62,8 +62,11 @@ class BybitImpl {
 			}
 			case TRADE_XRPUSD: {
 				cout << "got TRADE_XRPUSD:\n";
-				cout << data__trade_XRPUSD_.str() <<"\n\n";
-				return callback__trade_XRPUSD_(data__trade_XRPUSD_);
+				for(auto& trade : data__trades_XRPUSD_) {
+					cout << trade.str() <<"\n";
+					callback__trade_XRPUSD_(trade);
+				}
+				cout <<"\n\n";
 				break;
 			}
 		}

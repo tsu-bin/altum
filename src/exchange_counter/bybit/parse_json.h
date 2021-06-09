@@ -22,6 +22,6 @@ enum WhichOne {
 	TRADE_XRPUSD,
 };
 
-bool parse_json(JsonIter it, WhichOne& which, OrderBook& od_xrpusd, Trade& trade);
+bool parse_json(JsonIter& it, WhichOne& which, OrderBook& od_xrpusd, vector<Trade>& trades_xrpusd);
 
 #endif //ALTUM_PARSE_JSON_H

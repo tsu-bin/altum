@@ -21,8 +21,6 @@ enum Side {
 };
 
 struct OrderBook {
-	std::string symbol;
-
 	PriceOfTick spread() const {
 		return ask_levels_.begin()->first - bid_levels_.rbegin()->first;
 	}
@@ -60,7 +58,6 @@ struct OrderBook {
 
 struct Trade {
 public:
-	std::string symbol;
 	PriceOfTick price;
 	Size size;
 	Side side;
@@ -68,6 +65,8 @@ public:
 
 	std::string str() const;
 };
+
+const uint8_t k_XRPUSD_tick_precision = 4;
 
 
 #endif //ALTUM_MARKETDATA_H

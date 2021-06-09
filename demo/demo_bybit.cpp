@@ -14,11 +14,11 @@ int main(int argc, char** argv)
 
 	exchange_counter::bybit::Bybit bybit{};
 
-//	bybit.subscribe_XRPUSD_orderbook(
-//			[](const OrderBook& od){
-//				cout<<"got XRPUSD orderbook, mid-price="<<od.mid_price()<<" spread="<<od.spread()<<"\n\n";
-//				return true;
-//			});
+	bybit.subscribe_XRPUSD_orderbook(
+			[](const OrderBook& od){
+				cout<<"got XRPUSD orderbook, mid-price="<<od.mid_price()<<" spread="<<od.spread()<<"\n\n";
+				return true;
+			});
 
 	bybit.subscribe_XRPUSD_trade(
 			[](const Trade& trade){

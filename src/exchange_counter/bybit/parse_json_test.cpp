@@ -19,43 +19,45 @@ int main(void) {
 
 	WhichOne which_one;
 	OrderBook orderbook_xrpusd;
-	Trade trade_xrpusd;
+	vector<Trade> trades_xrpusd;
 
 	auto print_result = [&](const string& what) {
 		cout << what << ":\n";
 		switch (which_one) {
 			case NOT_INTERESTED: {
-				cout << "got NOT_INTERESTED msg\n\n";
+				cout << "got NOT_INTERESTED msg\n";
 				break;
 			}
 			case ORDER_BOOK_XRPUSD: {
 				cout << "got ORDER_BOOK_XRPUSD:\n";
-				cout << orderbook_xrpusd.str() <<"\n\n";
+				cout << orderbook_xrpusd.str() <<"\n";
 				break;
 			}
 			case TRADE_XRPUSD: {
 				cout << "got TRADE_XRPUSD:\n";
-				cout << trade_xrpusd.str() <<"\n\n";
+				for(auto& trade : trades_xrpusd)
+					cout << trade.str() <<"\n";
 				break;
 			}
 		}
+		cout<<"\n\n";
 	};
 
 	ondemand::parser parser;
 
 	JsonIter iter = parser.iterate(json_not_interested);
-	parse_json(move(iter), which_one, orderbook_xrpusd, trade_xrpusd);
+	parse_json(iter, which_one, orderbook_xrpusd, trades_xrpusd);
 	print_result("parse json_not_interested");
 
 	iter = parser.iterate(json_od_snapshot_xrpusd);
-	parse_json(move(iter), which_one, orderbook_xrpusd, trade_xrpusd);
+	parse_json(iter, which_one, orderbook_xrpusd, trades_xrpusd);
 	print_result("parse json_od_snapshot_xrpusd");
 
 	iter = parser.iterate(json_od_update_xrpusd);
-	parse_json(move(iter), which_one, orderbook_xrpusd, trade_xrpusd);
+	parse_json(iter, which_one, orderbook_xrpusd, trades_xrpusd);
 	print_result("parse json_od_update_xrpusd");
 
 	iter = parser.iterate(json_trade_xrpusd);
-	parse_json(move(iter), which_one, orderbook_xrpusd, trade_xrpusd);
+	parse_json(iter, which_one, orderbook_xrpusd, trades_xrpusd);
 	print_result("parse json_trade_xrpusd");
 }
