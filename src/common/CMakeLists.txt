@@ -1,3 +1,4 @@
-add_library(common INTERFACE)
+add_library(common
+        market_data.cpp)
 target_include_directories(common
-        INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

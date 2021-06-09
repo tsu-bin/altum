@@ -9,8 +9,6 @@ using namespace simdjson;
 
 int main(void) {
 
-	ondemand::parser parser;
-
 	auto json_not_interested = R"({"success":true,"ret_msg":"","conn_id":"2eae2350-a6ed-4667-bdb2-87db062ff260","request":{"op":"subscribe","args":["trade.XRPUSD"]}}
 )"_padded;
 
@@ -42,6 +40,8 @@ int main(void) {
 			}
 		}
 	};
+
+	ondemand::parser parser;
 
 	JsonIter iter = parser.iterate(json_not_interested);
 	parse_json(move(iter), which_one, orderbook_xrpusd, trade_xrpusd);

@@ -20,8 +20,9 @@ enum Side {
 	BID = 1
 };
 
-class OrderBook {
-public:
+struct OrderBook {
+	std::string symbol;
+
 	PriceOfTick spread() const {
 		return ask_levels_.begin()->first - bid_levels_.rbegin()->first;
 	}
@@ -50,28 +51,22 @@ public:
 
 	Timestamp timestamp;
 
-	std::string str() const {
-		std::string ret;
+	std::string str() const;
 
-		return ret;
-	}
-private:
+//private:
 	std::map<PriceOfTick, Size> ask_levels_{{k_price_of_tick_max_init, 0}};
 	std::map<PriceOfTick, Size> bid_levels_{{0, 0}};
 };
 
 struct Trade {
 public:
+	std::string symbol;
 	PriceOfTick price;
 	Size size;
 	Side side;
 	Timestamp timestamp;
 
-	std::string str() const {
-		std::string ret;
-
-		return ret;
-	}
+	std::string str() const;
 };
 
 
