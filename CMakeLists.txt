@@ -23,3 +23,5 @@ add_subdirectory(thirdparty)
 
 
 add_subdirectory(src)
+
+add_subdirectory(demo)
